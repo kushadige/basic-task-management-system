@@ -1,0 +1,43 @@
+{
+  "name": "basic-task-management-system",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "webpack serve --config ./bundler/webpack.dev.js",
+    "build": "rm -rf dist/ && webpack --config ./bundler/webpack.prod.js",
+    "start": "npx serve dist"
+  },
+  "keywords": [],
+  "author": "@kushadige",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.4.19",
+    "clsx": "^2.1.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.0",
+    "portfinder-sync": "^0.0.2",
+    "postcss": "^8.4.39",
+    "postcss-loader": "^8.1.1",
+    "style-loader": "^4.0.0",
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss": "^3.4.6",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.3",
+    "webpack": "^5.93.0",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4",
+    "webpack-merge": "^6.0.1"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-feather": "^2.0.10",
+    "uuid": "^10.0.0",
+    "yup": "^1.4.0",
+    "zustand": "^4.5.4"
+  }
+}
