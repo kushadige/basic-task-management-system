@@ -1,49 +1,40 @@
-import { type Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
-const config: Config = {
-  content: ["./src/**/*.{ts,tsx}"],
+const config = {
+  darkMode: ["class"],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
+  prefix: "",
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
-      colors: {
-        primary: {
-          background: "#3b82f6",
-          text: "#fff",
-          hover: "#2563eb",
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        secondary: {
-          background: "#100E1D",
-          text: "#fff",
-          hover: "#1E213A",
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
-        tertiary: {
-          background: "#252945",
-          text: "#6E707A",
-          hover: "#333A56",
-        },
-        accent: {
-          background: "#FFD43B",
-          text: "#000",
-          hover: "#FCC419",
-        },
-        danger: {
-          background: "#ef4444",
-          text: "#fff",
-          hover: "#dc2626",
-        },
-        warning: {
-          background: "#F59E0B",
-          text: "#fff",
-          hover: "#D97706",
-        },
-        success: {
-          background: "#22c55e",
-          text: "#fff",
-          hover: "#16a34a",
-        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [],
-};
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config
 
-export default config;
+export default config

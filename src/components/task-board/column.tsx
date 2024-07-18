@@ -1,6 +1,6 @@
+import { Card } from "@/components/task-board/card";
 import { useBoardState } from "@/hooks/useBoardState";
 import { useTaskStore } from "@/hooks/useTaskStore";
-import { Card } from "./card";
 
 import { type Task, type Status } from "@/utils/types";
 

@@ -1,6 +1,17 @@
-import { Edit } from "react-feather";
+import { useState } from "react";
+import { SquarePen } from "lucide-react";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { TaskForm } from "@/components/task-board/task-form";
 import { useBoardState } from "@/hooks/useBoardState";
+import { useTaskStore } from "@/hooks/useTaskStore";
 
 import { type Task } from "@/utils/types";
 
@@ -11,19 +22,33 @@ interface CardProps {
 }
 
 export const Card = ({ task, groupIndex, itemIndex }: CardProps) => {
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const { setDragState, setTargetItemIndex } = useBoardState();
+  const { updateTask } = useTaskStore();
 
+  // Set the drag state
   const handleDragStart = () => {
     setDragState({ groupIndex, itemIndex });
   };
 
+  // Set the target item index
   const handleDragEnterCapture = (e: React.DragEvent) => {
     e.stopPropagation();
     setTargetItemIndex(itemIndex);
   };
 
+  // Prevent default drag over
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+  };
+
+  // Update the task
+  const onUpdateTask = (data: Omit<Task, "uid">) => {
+    updateTask({
+      uid: task.uid,
+      ...data,
+    });
+    setIsTaskFormOpen(false);
   };
 
   return (
@@ -32,14 +57,29 @@ export const Card = ({ task, groupIndex, itemIndex }: CardProps) => {
       onDragStart={handleDragStart}
       onDragEnterCapture={handleDragEnterCapture}
       onDragOver={handleDragOver}
-      className="cursor-grab active:cursor-grabbing pb-2"
+      className="cursor-grab active:cursor-grabbing pb-2 opacity-95 hover:opacity-100 transition-opacity"
     >
       <div className="bg-white relative rounded select-none flex z-0 flex-col justify-between min-h-40 p-4">
-        <div className="absolute inset-1 border-2 border-secondary-background">
-          <Edit
-            className="text-secondary-background absolute right-1 top-1 hover:cursor-pointer z-20 hover:text-warning-background transition-all scale-90 hover:scale-100"
-            onClick={() => console.log("clicked")}
-          />
+        <div className="absolute inset-1 border-2 border-slate-800">
+          {/* Task Form Dialog */}
+          <Dialog open={isTaskFormOpen} onOpenChange={setIsTaskFormOpen}>
+            <DialogTrigger>
+              <SquarePen className="absolute right-1 top-1 hover:cursor-pointer z-20 text-slate-800 hover:text-orange-500 transition-all scale-90 hover:scale-100" />
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Update Task</DialogTitle>
+                <DialogDescription>
+                  Fill out the form to update the task
+                </DialogDescription>
+              </DialogHeader>
+              <TaskForm
+                task={task}
+                onSubmit={onUpdateTask}
+                onCancel={() => setIsTaskFormOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
         <div>
           <h3 className="text-lg font-bold">{task.title}</h3>

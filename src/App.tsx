@@ -1,13 +1,10 @@
 import { useEffect } from "react";
 
+import { Header } from "./components/layout/header";
 import { TaskBoard } from "./components/task-board/board";
-import { JSONInput } from "./components/ui/json-input";
-import { Button } from "./components/ui/button";
-import { tasksSchema } from "./utils/schemas";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useTaskStore } from "./hooks/useTaskStore";
 
-import { type ValidationError } from "yup";
 import { type Task } from "./utils/types";
 
 import dummy from "./data/dummy.json";
@@ -17,40 +14,14 @@ export const App = () => {
     "tasks",
     dummy as Omit<Task, "uid">[]
   );
-  const { taskGroups, setTaskGroups } = useTaskStore();
+  const { taskGroups, setTaskGroups, setTasksState } = useTaskStore();
 
-  // Validate json input and save it to local storage
-  const onSave = (data?: string) => {
-    if (!data) {
-      throw new Error("No data");
-    }
-
-    let parsedData: Omit<Task, "uid">[];
-    try {
-      parsedData = JSON.parse(data);
-    } catch (err) {
-      throw new Error("Invalid JSON");
-    }
-
-    try {
-      tasksSchema.validateSync(parsedData, {
-        abortEarly: false,
-      });
-    } catch (err) {
-      const error = err as ValidationError;
-      const messages = error.inner.map(
-        (e) => `${e.path?.split(".")[0]} ${e.message}`
-      );
-      throw new Error(JSON.stringify(messages));
-    }
-
-    setTaskGroups(parsedData);
-  };
-
+  // Initialize task groups from local storage on first load
   useEffect(() => {
     setTaskGroups(state);
   }, []);
 
+  // Update local storage when task groups change
   useEffect(() => {
     const tasks = taskGroups
       .map((taskGroup) =>
@@ -62,19 +33,14 @@ export const App = () => {
       .flat();
 
     setState(tasks);
+    setTasksState(tasks);
   }, [taskGroups]);
 
   return (
     <div className="bg-neutral-100">
-      <div className="max-w-7xl p-4 grid grid-rows-[auto_auto_1fr] mx-auto h-screen">
-        <h1 className="text-5xl font-bold text-gray-800 text-center">
-          <span className="text-blue-500">Task</span> Board
-        </h1>
-        <div className="flex flex-nowrap justify-center gap-4 my-6">
-          <Button color="secondary">Create Task</Button>
-          <JSONInput onSave={onSave} initialData={state} />
-        </div>
-        <TaskBoard taskGroups={taskGroups} />
+      <div className="max-w-7xl p-4 grid grid-rows-[auto_1fr] gap-6 mx-auto h-screen">
+        <Header />
+        <TaskBoard />
       </div>
     </div>
   );

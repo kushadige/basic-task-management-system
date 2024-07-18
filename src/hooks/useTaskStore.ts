@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
 
-import { type TaskGroup, type Task, type Status } from "@/utils/types";
 import { taskBoardGroupConstants } from "@/utils/constants";
+import { type TaskGroup, type Task, type Status } from "@/utils/types";
 
 interface TaskState {
+  tasksState: Omit<Task, "uid">[];
   taskGroups: TaskGroup[];
   setTaskGroups: (tasks: Omit<Task, "uid">[]) => void;
+  setTasksState: (tasks: Omit<Task, "uid">[]) => void;
   addTask: (task: Omit<Task, "uid">) => void;
   removeTask: (task_uid: string) => void;
   updateTask: (task: Task) => void;
@@ -21,6 +23,7 @@ interface TaskState {
 }
 
 export const useTaskStore = create<TaskState>((set) => ({
+  tasksState: [],
   taskGroups: [],
   setTaskGroups: (tasks) =>
     set(() => {
@@ -44,6 +47,11 @@ export const useTaskStore = create<TaskState>((set) => ({
 
       return { taskGroups };
     }),
+
+  setTasksState: (tasks) =>
+    set(() => ({
+      tasksState: tasks,
+    })),
 
   // Add task
   addTask: (task) =>
@@ -97,26 +105,34 @@ export const useTaskStore = create<TaskState>((set) => ({
   // Update task
   updateTask: (updatedTask) =>
     set((state) => {
-      const groupIndex = state.taskGroups.findIndex((taskGroup) =>
-        taskGroup.tasks.some((task) => task.uid === updatedTask.uid)
+      const tasks = state.taskGroups
+        .map((taskGroup) => taskGroup.tasks.slice())
+        .flat();
+
+      const taskIndex = tasks.findIndex((task) => task.uid === updatedTask.uid);
+
+      if (taskIndex === -1) return state; // If the task is not found, return state unchanged
+
+      const taskGroups: TaskGroup[] = taskBoardGroupConstants.map(
+        (taskBoardGroupConstant) => ({
+          status: taskBoardGroupConstant.status,
+          label: taskBoardGroupConstant.label,
+          color: taskBoardGroupConstant.color,
+          tasks: [],
+        })
       );
 
-      if (groupIndex === -1) return state; // If the task is not found, return state unchanged
+      tasks[taskIndex] = updatedTask;
 
-      const newTaskGroups = state.taskGroups.map((taskGroup, idx) => {
-        if (idx === groupIndex) {
-          return {
-            ...taskGroup,
-            tasks: taskGroup.tasks.map((task) =>
-              task.uid === updatedTask.uid ? updatedTask : task
-            ),
-          };
+      tasks.forEach((task) => {
+        const group = taskGroups.find((group) => group.status === task.status);
+        if (group) {
+          group.tasks.push(task);
         }
-        return taskGroup;
       });
 
       return {
-        taskGroups: newTaskGroups,
+        taskGroups,
       };
     }),
 

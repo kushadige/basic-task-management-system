@@ -1,12 +1,9 @@
-import { Column } from "./column";
+import { Column } from "@/components/task-board/column";
+import { useTaskStore } from "@/hooks/useTaskStore";
 
-import { type TaskGroup } from "@/utils/types";
+export const TaskBoard = () => {
+  const { taskGroups } = useTaskStore();
 
-interface TaskBoardProps {
-  taskGroups: TaskGroup[];
-}
-
-export const TaskBoard = ({ taskGroups }: TaskBoardProps) => {
   return (
     <div className="grid grid-cols-[repeat(3,_auto)] lg:grid-cols-3 overflow-y-hidden overflow-x-scroll gap-4">
       {taskGroups.map((taskGroup, index) => (

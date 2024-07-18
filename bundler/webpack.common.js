@@ -11,7 +11,7 @@ module.exports = {
     clean: true,
     assetModuleFilename: "[name][ext]",
   },
-  // devtool: "source-map",
+  devtool: "source-map",
   module: {
     rules: [
       {
@@ -42,4 +42,9 @@ module.exports = {
       minify: true,
     }),
   ],
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+    },
+  },
 };
