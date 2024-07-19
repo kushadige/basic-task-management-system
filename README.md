@@ -48,6 +48,74 @@ bun dev
 
 Open http://localhost:8080 with your browser to see the result. The page auto-updates as you edit the files.
 
+## Task Management Features
+
+### Creating a Task
+
+To create a task, follow these steps:
+
+1. Click the "Create Task" button in the header.
+2. Fill in the task details in the form.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/5b3ea83b-f628-47fe-9904-b5cbde0e11bf" alt="Creating a task" />
+</div>
+
+### Deleting a Task
+
+To delete a task, follow these steps:
+
+1. Grab the task you want to delete.
+2. Move it to the trash icon that appears when you grab the task.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/a85ac78f-61e6-4aa7-9f36-0f0a2ea84230" alt="Deleting a task" />
+</div>
+
+### Moving a Task
+
+To move a task to a different column, follow these steps:
+
+1. Grab the task you want to move.
+2. Drag it to the desired column.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/aecc9404-b79d-4ba5-a857-9ac3f154dda3" alt="Moving a task" />
+</div>
+
+### Editing a Task
+
+To edit a task, follow these steps:
+
+1. Click the edit icon represented by a pencil on the task card.
+2. Modify the task details in the form.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/30a72fc9-3449-4602-af5d-9ec02a780f20" alt="Editing a task" />
+</div>
+
+### Importing Tasks
+
+To import tasks from a JSON file, follow these steps:
+
+1. Click the "JSON Input" button in the header.
+2. Paste the JSON data into the input field.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/834189db-95cd-4b69-970b-b36a52793771" alt="Importing tasks" />
+</div>
+
+### Reordering Columns
+
+To reorder columns, follow these steps:
+
+1. Grab the grid icon on the column header.
+2. Drag it to the drop zone that appears when you move the column.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/4ccce3a9-4294-43d3-95e4-934500602355" alt="Reordering columns" />
+</div>
+
 ## Workspace Structure
 
 - **bundler/**: Contains Webpack configuration files for different environments.
