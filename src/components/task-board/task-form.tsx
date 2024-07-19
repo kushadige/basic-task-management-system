@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTaskStore } from "@/hooks/useTaskStore";
 
 import { taskSchema } from "@/utils/schemas";
 import { type Task } from "@/utils/types";
@@ -31,6 +32,12 @@ interface TaskFormProps {
 }
 
 export const TaskForm = ({ onSubmit, onCancel, task }: TaskFormProps) => {
+  const { taskGroups } = useTaskStore();
+
+  const taskStatuses = useMemo(() => {
+    return taskGroups.map((taskGroup) => taskGroup.status);
+  }, [taskGroups]);
+
   const defaultValues: Omit<Task, "uid"> = useMemo(
     () => ({
       title: task?.title || "",
@@ -112,9 +119,11 @@ export const TaskForm = ({ onSubmit, onCancel, task }: TaskFormProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="To Do">To Do</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="Done">Done</SelectItem>
+                  {taskStatuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormDescription>Select the status of the task</FormDescription>

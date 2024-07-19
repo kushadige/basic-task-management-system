@@ -2,10 +2,10 @@ import { Card } from "@/components/task-board/card";
 import { useBoardState } from "@/hooks/useBoardState";
 import { useTaskStore } from "@/hooks/useTaskStore";
 
-import { type Task, type Status } from "@/utils/types";
+import { type Task } from "@/utils/types";
 
 interface ColumnProps {
-  status: Status;
+  status: string;
   label: string;
   color: string;
   tasks: Task[];
@@ -20,7 +20,8 @@ export const Column = ({
   groupIndex,
 }: ColumnProps) => {
   const { moveTask, taskGroups } = useTaskStore();
-  const { dragState, targetItemIndex, setTargetItemIndex } = useBoardState();
+  const { dragState, setDragState, targetItemIndex, setTargetItemIndex } =
+    useBoardState();
 
   const handleDragEnd = () => {
     if (dragState === null || targetItemIndex === null) return;
@@ -35,6 +36,12 @@ export const Column = ({
       targetItemIndex,
       status
     );
+
+    // Remove the ghost drag elements on drag end
+    removeGhostDragElements();
+
+    // Reset the drag state
+    setDragState(null);
   };
 
   const handleDrop = () => {
@@ -54,8 +61,16 @@ export const Column = ({
     e.preventDefault();
   };
 
+  const removeGhostDragElements = () => {
+    const crts = document.querySelectorAll("#drag-ghost");
+    crts.forEach((crt) => crt.remove());
+  };
+
   return (
-    <div className="bg-neutral-800 border-neutral-700 drop-shadow-xl rounded-lg flex flex-col overflow-hidden min-w-80 shrink-0">
+    <div
+      draggable
+      className="bg-neutral-800 border-neutral-700 drop-shadow-xl rounded-lg flex flex-col overflow-hidden w-96 max-w-full shrink-0"
+    >
       <div className="flex items-center justify-between px-4 py-2 border-b">
         <h3
           className="font-bold text-center text-xl uppercase"
@@ -69,6 +84,10 @@ export const Column = ({
       </div>
       <div
         className="flex-1 p-4 flex flex-col overflow-hidden"
+        onDragEndCapture={() => {
+          setDragState(null);
+          removeGhostDragElements();
+        }}
         onDrop={handleDrop}
       >
         <div className="flex flex-col h-full overflow-y-scroll">

@@ -1,14 +1,12 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
 
-import { taskBoardGroupConstants } from "@/utils/constants";
-import { type TaskGroup, type Task, type Status } from "@/utils/types";
+import { getRandomHexColor } from "@/utils/color-generator";
+import { type TaskGroup, type Task } from "@/utils/types";
 
 interface TaskState {
-  tasksState: Omit<Task, "uid">[];
   taskGroups: TaskGroup[];
-  setTaskGroups: (tasks: Omit<Task, "uid">[]) => void;
-  setTasksState: (tasks: Omit<Task, "uid">[]) => void;
+  setTaskGroups: (tasks: TaskGroup[]) => void;
   addTask: (task: Omit<Task, "uid">) => void;
   removeTask: (task_uid: string) => void;
   updateTask: (task: Task) => void;
@@ -18,40 +16,34 @@ interface TaskState {
     itemIndex: number,
     targetGroupIndex: number,
     targetItemIndex: number,
-    targetGroupStatus: Status
+    targetGroupStatus: string
   ) => void;
+  moveColumn: (groupIndex: number, targetGroupIndex: number) => void;
 }
 
-export const useTaskStore = create<TaskState>((set) => ({
-  tasksState: [],
-  taskGroups: [],
-  setTaskGroups: (tasks) =>
-    set(() => {
-      const tasksWithUids = tasks.map((task) => ({ ...task, uid: uuidv4() }));
-
-      const taskGroups: TaskGroup[] = taskBoardGroupConstants.map(
-        (taskBoardGroupConstant) => ({
-          status: taskBoardGroupConstant.status,
-          label: taskBoardGroupConstant.label,
-          color: taskBoardGroupConstant.color,
-          tasks: [],
-        })
-      );
-
-      tasksWithUids.forEach((task) => {
-        const group = taskGroups.find((group) => group.status === task.status);
-        if (group) {
-          group.tasks.push(task);
-        }
+export const groupTasksByStatus = (tasks: Task[]) => {
+  return tasks.reduce((acc: TaskGroup[], task) => {
+    const group = acc.find((group) => group.status === task.status);
+    if (group) {
+      group.tasks.push(task);
+    } else {
+      acc.push({
+        status: task.status,
+        label: task.status,
+        color: getRandomHexColor(),
+        tasks: [task],
       });
+    }
+    return acc;
+  }, []);
+};
 
+export const useTaskStore = create<TaskState>((set) => ({
+  taskGroups: [],
+  setTaskGroups: (taskGroups) =>
+    set(() => {
       return { taskGroups };
     }),
-
-  setTasksState: (tasks) =>
-    set(() => ({
-      tasksState: tasks,
-    })),
 
   // Add task
   addTask: (task) =>
@@ -87,18 +79,17 @@ export const useTaskStore = create<TaskState>((set) => ({
 
       if (groupIndex === -1) return state; // If the task is not found, return state unchanged
 
-      const newTaskGroups = state.taskGroups.map((taskGroup, idx) => {
-        if (idx === groupIndex) {
-          return {
-            ...taskGroup,
-            tasks: taskGroup.tasks.filter((task) => task.uid !== task_uid),
-          };
-        }
-        return taskGroup;
-      });
+      const taskGroups = state.taskGroups.map((taskGroup, idx) =>
+        idx === groupIndex
+          ? {
+              ...taskGroup,
+              tasks: taskGroup.tasks.filter((task) => task.uid !== task_uid),
+            }
+          : taskGroup
+      );
 
       return {
-        taskGroups: newTaskGroups,
+        taskGroups,
       };
     }),
 
@@ -110,26 +101,51 @@ export const useTaskStore = create<TaskState>((set) => ({
         .flat();
 
       const taskIndex = tasks.findIndex((task) => task.uid === updatedTask.uid);
+      const groupIndex = state.taskGroups.findIndex(
+        (taskGroup) => taskGroup.status === tasks[taskIndex].status
+      );
+      const targetGroupIndex = state.taskGroups.findIndex(
+        (taskGroup) => taskGroup.status === updatedTask.status
+      );
 
       if (taskIndex === -1) return state; // If the task is not found, return state unchanged
 
-      const taskGroups: TaskGroup[] = taskBoardGroupConstants.map(
-        (taskBoardGroupConstant) => ({
-          status: taskBoardGroupConstant.status,
-          label: taskBoardGroupConstant.label,
-          color: taskBoardGroupConstant.color,
-          tasks: [],
-        })
+      // Shallow copy of tasks
+      let updatedTasks = tasks.slice();
+
+      // Update task
+      updatedTasks[taskIndex] = updatedTask;
+
+      // Move task to the correct group
+      if (groupIndex === targetGroupIndex) {
+        const taskGroups = state.taskGroups.map((taskGroup, idx) =>
+          idx === groupIndex ? { ...taskGroup, tasks: updatedTasks } : taskGroup
+        );
+
+        return {
+          taskGroups,
+        };
+      }
+
+      const updatedSourceGroup = {
+        ...state.taskGroups[groupIndex],
+        tasks: state.taskGroups[groupIndex].tasks.filter(
+          (task) => task.uid !== updatedTask.uid
+        ),
+      };
+
+      const updatedTargetGroup = {
+        ...state.taskGroups[targetGroupIndex],
+        tasks: [...state.taskGroups[targetGroupIndex].tasks, updatedTask],
+      };
+
+      const taskGroups = state.taskGroups.map((taskGroup, idx) =>
+        idx === groupIndex
+          ? updatedSourceGroup
+          : idx === targetGroupIndex
+          ? updatedTargetGroup
+          : taskGroup
       );
-
-      tasks[taskIndex] = updatedTask;
-
-      tasks.forEach((task) => {
-        const group = taskGroups.find((group) => group.status === task.status);
-        if (group) {
-          group.tasks.push(task);
-        }
-      });
 
       return {
         taskGroups,
@@ -193,6 +209,24 @@ export const useTaskStore = create<TaskState>((set) => ({
             ? updatedTargetGroup
             : taskGroup
         ),
+      };
+    }),
+
+  // Move column
+  moveColumn: (groupIndex, targetGroupIndex) =>
+    set((state) => {
+      // Shallow copy of task groups
+      const updatedTaskGroups = state.taskGroups.slice();
+
+      // Move the column
+      updatedTaskGroups.splice(
+        targetGroupIndex,
+        0,
+        ...updatedTaskGroups.splice(groupIndex, 1)
+      );
+
+      return {
+        taskGroups: updatedTaskGroups,
       };
     }),
 }));

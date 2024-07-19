@@ -1,15 +1,13 @@
-export type Status = "To Do" | "In Progress" | "Done";
-
 export interface Task {
   uid: string;
   title: string;
   description: string;
-  status: Status;
+  status: string;
   assignee: string;
 }
 
 export interface TaskGroup {
-  status: Status;
+  status: string;
   label: string;
   color: string;
   tasks: Task[];

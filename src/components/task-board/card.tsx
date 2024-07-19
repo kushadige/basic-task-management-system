@@ -27,7 +27,31 @@ export const Card = ({ task, groupIndex, itemIndex }: CardProps) => {
   const { updateTask } = useTaskStore();
 
   // Set the drag state
-  const handleDragStart = () => {
+  const handleDragStart = (e: React.DragEvent) => {
+    // Set task_uid data to the dataTransfer object
+    e.dataTransfer.setData("task_uid", task.uid);
+
+    // Create a ghost drag element and style it
+    const crt = document.createElement("div");
+    crt.innerHTML = `
+      <div class="scale-50 origin-top-left w-[22rem]">
+        <div class="bg-white rounded-xl flex flex-col justify-between min-h-40 p-4">
+          <div>
+            <h3 class="text-lg font-bold">${task.title}</h3>
+            <p>${task.description}</p>
+          </div>
+          <div class="self-end">
+            <p class="text-sm text-gray-500">Assignee: ${task.assignee}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    crt.id = "drag-ghost";
+    crt.style.position = "absolute";
+    document.body.appendChild(crt);
+    e.dataTransfer.setDragImage(crt, 0, 0);
+
+    // Set the drag state
     setDragState({ groupIndex, itemIndex });
   };
 

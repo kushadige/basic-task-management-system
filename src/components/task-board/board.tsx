@@ -5,7 +5,7 @@ export const TaskBoard = () => {
   const { taskGroups } = useTaskStore();
 
   return (
-    <div className="grid grid-cols-[repeat(3,_auto)] lg:grid-cols-3 overflow-y-hidden overflow-x-scroll gap-4">
+    <div className="grid grid-flow-col auto-cols-max overflow-y-hidden overflow-x-scroll gap-4 rounded-lg py-4">
       {taskGroups.map((taskGroup, index) => (
         <Column
           key={index}
