@@ -28,6 +28,9 @@ export const Card = ({ task, groupIndex, itemIndex }: CardProps) => {
 
   // Set the drag state
   const handleDragStart = (e: React.DragEvent) => {
+    // Prevent the drag event from bubbling up
+    e.stopPropagation();
+
     // Set task_uid data to the dataTransfer object
     e.dataTransfer.setData("task_uid", task.uid);
 
@@ -63,6 +66,7 @@ export const Card = ({ task, groupIndex, itemIndex }: CardProps) => {
 
   // Prevent default drag over
   const handleDragOver = (e: React.DragEvent) => {
+    e.dataTransfer.dropEffect = "move";
     e.preventDefault();
   };
 

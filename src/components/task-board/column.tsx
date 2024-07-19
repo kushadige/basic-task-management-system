@@ -1,3 +1,5 @@
+import { GripVertical } from "lucide-react";
+
 import { Card } from "@/components/task-board/card";
 import { useBoardState } from "@/hooks/useBoardState";
 import { useTaskStore } from "@/hooks/useTaskStore";
@@ -20,8 +22,14 @@ export const Column = ({
   groupIndex,
 }: ColumnProps) => {
   const { moveTask, taskGroups } = useTaskStore();
-  const { dragState, setDragState, targetItemIndex, setTargetItemIndex } =
-    useBoardState();
+  const {
+    dragState,
+    columnDragState,
+    setDragState,
+    targetItemIndex,
+    setTargetItemIndex,
+    setColumnDragState,
+  } = useBoardState();
 
   const handleDragEnd = () => {
     if (dragState === null || targetItemIndex === null) return;
@@ -58,6 +66,7 @@ export const Column = ({
   };
 
   const handleDragOver = (e: React.DragEvent) => {
+    e.dataTransfer.dropEffect = "move";
     e.preventDefault();
   };
 
@@ -66,10 +75,25 @@ export const Column = ({
     crts.forEach((crt) => crt.remove());
   };
 
+  const handleDragStartColumn = () => {
+    setColumnDragState({
+      groupIndex,
+      targetGroupIndex: groupIndex,
+      isColumnDraggable: true,
+    });
+  };
+
+  const handleDragEnterColumn = () => {
+    if (columnDragState) {
+      setColumnDragState({ ...columnDragState, targetGroupIndex: groupIndex });
+    }
+  };
+
   return (
     <div
-      draggable
-      className="bg-neutral-800 border-neutral-700 drop-shadow-xl rounded-lg flex flex-col overflow-hidden w-96 max-w-full shrink-0"
+      draggable={columnDragState?.isColumnDraggable}
+      onDragEnter={handleDragEnterColumn}
+      className="bg-neutral-800 border-neutral-700 drop-shadow-xl rounded-lg flex flex-col overflow-hidden w-96 max-w-full flex-1 shrink-0"
     >
       <div className="flex items-center justify-between px-4 py-2 border-b">
         <h3
@@ -80,11 +104,20 @@ export const Column = ({
         >
           {label}
         </h3>
-        <span className="text-xl text-neutral-400">{tasks.length}</span>
+        <div className="flex items-center gap-2">
+          <GripVertical
+            id="column-drag"
+            onMouseDown={handleDragStartColumn}
+            className="text-neutral-400 cursor-grab active:cursor-grabbing"
+            size={16}
+          />
+          <span className="text-xl text-neutral-400">{tasks.length}</span>
+        </div>
       </div>
       <div
         className="flex-1 p-4 flex flex-col overflow-hidden"
-        onDragEndCapture={() => {
+        onDragEnd={(e) => {
+          e.stopPropagation();
           setDragState(null);
           removeGhostDragElements();
         }}
@@ -101,7 +134,7 @@ export const Column = ({
           ))}
 
           <div
-            className="border-2 border-dashed border-gray-200 py-0 rounded-md transition-[padding,opacity] bg-neutral-800 flex-1"
+            className="border border-dashed border-gray-200 py-0 rounded-md transition-[padding,opacity] bg-neutral-800 flex-1"
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
             onDropCapture={handleDropCapture}
